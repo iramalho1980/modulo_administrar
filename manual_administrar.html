@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manual - Módulo Administrar</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            color: #e0e0e0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #a8e6a1;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            text-shadow: 0 0 20px rgba(168, 230, 161, 0.3);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #b0b0b0;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+
+        /* Gráfico Donut */
+        .progress-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 40px;
+            padding: 30px;
+            background: rgba(50, 50, 50, 0.4);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(168, 230, 161, 0.2);
+            border-radius: 12px;
+        }
+
+        .donut-chart {
+            position: relative;
+            width: 200px;
+            height: 200px;
+        }
+
+        .donut-chart svg {
+            transform: rotate(-90deg);
+        }
+
+        .donut-background {
+            fill: none;
+            stroke: rgba(60, 60, 60, 0.8);
+            stroke-width: 20;
+        }
+
+        .donut-progress {
+            fill: none;
+            stroke: #a8e6a1;
+            stroke-width: 20;
+            stroke-linecap: round;
+            transition: stroke-dashoffset 0.5s ease;
+            filter: drop-shadow(0 0 8px rgba(168, 230, 161, 0.5));
+        }
+
+        .donut-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+        .donut-percentage {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #a8e6a1;
+            display: block;
+        }
+
+        .donut-label {
+            font-size: 0.9em;
+            color: #b0b0b0;
+            display: block;
+            margin-top: 5px;
+        }
+
+        .progress-stats {
+            margin-left: 40px;
+            color: #d0d0d0;
+        }
+
+        .progress-stats h3 {
+            color: #a8e6a1;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .stat-label {
+            margin-right: 10px;
+            min-width: 120px;
+        }
+
+        .stat-value {
+            font-weight: bold;
+            color: #a8e6a1;
+        }
+
+        .section {
+            background: rgba(50, 50, 50, 0.4);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(168, 230, 161, 0.2);
+            border-radius: 12px;
+            margin-bottom: 20px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .section:hover {
+            border-color: rgba(168, 230, 161, 0.4);
+            box-shadow: 0 8px 32px rgba(168, 230, 161, 0.1);
+        }
+
+        .section-header {
+            background: rgba(40, 40, 40, 0.6);
+            padding: 20px 25px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+            user-select: none;
+        }
+
+        .section-header:hover {
+            background: rgba(50, 50, 50, 0.8);
+        }
+
+        .section-header h2 {
+            color: #a8e6a1;
+            font-size: 1.4em;
+            font-weight: 600;
+        }
+
+        .section-icon {
+            color: #a8e6a1;
+            font-size: 1.5em;
+            transition: transform 0.3s ease;
+        }
+
+        .section.active .section-icon {
+            transform: rotate(180deg);
+        }
+
+        .section-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease, padding 0.4s ease;
+            background: rgba(35, 35, 35, 0.3);
+        }
+
+        .section.active .section-content {
+            max-height: 3000px;
+            padding: 25px;
+        }
+
+        .section-content p {
+            line-height: 1.8;
+            margin-bottom: 15px;
+            color: #d0d0d0;
+        }
+
+        .section-content ul {
+            margin-left: 20px;
+            margin-bottom: 15px;
+        }
+
+        .section-content li {
+            line-height: 1.8;
+            margin-bottom: 10px;
+            color: #d0d0d0;
+        }
+
+        .highlight {
+            color: #a8e6a1;
+            font-weight: 600;
+        }
+
+        .menu-path {
+            background: rgba(168, 230, 161, 0.1);
+            border-left: 3px solid #a8e6a1;
+            padding: 12px 15px;
+            margin: 15px 0;
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            color: #a8e6a1;
+        }
+
+        .step {
+            background: rgba(60, 60, 60, 0.4);
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 8px;
+            border-left: 4px solid #a8e6a1;
+            position: relative;
+            padding-left: 60px;
+        }
+
+        .step-checkbox-container {
+            position: absolute;
+            left: 15px;
+            top: 15px;
+        }
+
+        .step-checkbox {
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            border: 2px solid #a8e6a1;
+            border-radius: 6px;
+            background: rgba(40, 40, 40, 0.6);
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .step-checkbox:hover {
+            background: rgba(168, 230, 161, 0.1);
+            box-shadow: 0 0 10px rgba(168, 230, 161, 0.3);
+        }
+
+        .step-checkbox:checked {
+            background: #a8e6a1;
+            border-color: #a8e6a1;
+        }
+
+        .step-checkbox:checked::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #1a1a1a;
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .step.completed {
+            opacity: 0.7;
+            border-left-color: #7ab574;
+        }
+
+        .step-number {
+            display: inline-block;
+            background: #a8e6a1;
+            color: #1a1a1a;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .warning {
+            background: rgba(255, 193, 7, 0.1);
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 6px;
+            color: #ffd54f;
+        }
+
+        .info-box {
+            background: rgba(168, 230, 161, 0.1);
+            border: 1px solid rgba(168, 230, 161, 0.3);
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 8px;
+        }
+
+        /* Checkbox personalizado para listas */
+        .checklist-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            padding: 8px;
+            border-radius: 6px;
+            transition: background 0.2s ease;
+        }
+
+        .checklist-item:hover {
+            background: rgba(168, 230, 161, 0.05);
+        }
+
+        .checklist-checkbox {
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #a8e6a1;
+            border-radius: 4px;
+            background: rgba(40, 40, 40, 0.6);
+            cursor: pointer;
+            margin-right: 12px;
+            position: relative;
+            transition: all 0.3s ease;
+            flex-shrink: 0;
+        }
+
+        .checklist-checkbox:hover {
+            background: rgba(168, 230, 161, 0.1);
+        }
+
+        .checklist-checkbox:checked {
+            background: #a8e6a1;
+            border-color: #a8e6a1;
+        }
+
+        .checklist-checkbox:checked::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #1a1a1a;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .checklist-item.completed {
+            opacity: 0.6;
+        }
+
+        .checklist-item.completed label {
+            text-decoration: line-through;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2em;
+            }
+
+            .section-header h2 {
+                font-size: 1.2em;
+            }
+
+            .container {
+                padding: 20px 10px;
+            }
+
+            .progress-container {
+                flex-direction: column;
+            }
+
+            .progress-stats {
+                margin-left: 0;
+                margin-top: 20px;
+            }
+
+            .donut-chart {
+                width: 150px;
+                height: 150px;
+            }
+
+            .donut-percentage {
+                font-size: 2em;
+            }
+        }
+
+        /* Animação de entrada */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .section {
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        .section:nth-child(1) { animation-delay: 0.1s; }
+        .section:nth-child(2) { animation-delay: 0.2s; }
+        .section:nth-child(3) { animation-delay: 0.3s; }
+        .section:nth-child(4) { animation-delay: 0.4s; }
+        .section:nth-child(5) { animation-delay: 0.5s; }
+        .section:nth-child(6) { animation-delay: 0.6s; }
+        .section:nth-child(7) { animation-delay: 0.7s; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Manual do Módulo Administrar</h1>
+        <p class="subtitle">Guia completo para gerenciamento de tempo e atividades do sistema</p>
+
+        <!-- Gráfico de Progresso -->
+        <div class="progress-container">
+            <div class="donut-chart">
+                <svg width="200" height="200">
+                    <circle class="donut-background" cx="100" cy="100" r="80"></circle>
+                    <circle class="donut-progress" cx="100" cy="100" r="80" 
+                            stroke-dasharray="502.4" 
+                            stroke-dashoffset="502.4"
+                            id="progressCircle"></circle>
+                </svg>
+                <div class="donut-text">
+                    <span class="donut-percentage" id="percentageText">0%</span>
+                    <span class="donut-label">Concluído</span>
+                </div>
+            </div>
+            <div class="progress-stats">
+                <h3>Progresso do Manual</h3>
+                <div class="stat-item">
+                    <span class="stat-label">Total de itens:</span>
+                    <span class="stat-value" id="totalItems">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Concluídos:</span>
+                    <span class="stat-value" id="completedItems">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Restantes:</span>
+                    <span class="stat-value" id="remainingItems">0</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Seção 1: Introdução -->
+        <div class="section">
+            <div class="section-header">
+                <h2>📋 Introdução ao Módulo Administrar</h2>
+                <span class="section-icon">▼</span>
+            </div>
+            <div class="section-content">
+                <p>O <span class="highlight">Módulo Administrar</span> é uma ferramenta poderosa que permite gerenciar o tempo de inatividade dos usuários no sistema, oferecendo recursos avançados para controle e análise de produtividade.</p>
+                
+                <div class="info-box">
+                    <h3 style="color: #a8e6a1; margin-bottom: 10px;">Principais Funcionalidades:</h3>
+                    <div class="checklist-item">
+                        <input type="checkbox" class="checklist-checkbox" id="func1">
+                        <label for="func1">Gerenciamento do tempo de inatividade dos usuários</label>
+                    </div>
+                    <div class="checklist-item">
+                        <input type="checkbox" class="checklist-checkbox" id="func2">
+                        <label for="func2">Desconexão automática quando necessário</label>
+                    </div>
+                    <div class="checklist-item">
+                        <input type="checkbox" class="checklist-checkbox" id="func3">
+                        <label for="func3">Registro de atividades realizadas fora do sistema</label>
+                    </div>
+                    <div class="checklist-item">
+                        <input type="checkbox" class="checklist-checkbox" id="func4">
+                        <label for="func4">Geração de relatórios detalhados de desempenho</label>
+                    </div>
+                    <div class="checklist-item">
+                        <input type="checkbox" class="checklist-checkbox" id="func5">
+                        <label for="func5">Análise de tarefas realizadas e atividades externas</label>
+                    </div>
+                    <div class="checklist-item">
+                        <input type="checkbox" class="checklist-checkbox" id="func6">
+                        <label for="func6">Relatórios de análise de desempenho do escritório</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Seção 2: Configuração de Parâmetros -->
+        <div class="section">
+            <div class="section-header">
+                <h2>⚙️ Configuração de Parâmetros</h2>
+                <span class="section-icon">▼</span>
+            </div>
+            <div class="section-content">
+                <p>A configuração dos parâmetros é o primeiro passo para utilizar o módulo de forma eficiente. Siga os passos abaixo:</p>
+
+                <div class="menu-path">
+                    Menu → Controle → Parâmetros
+                </div>
+
+                <div class="step">
+                    <div class="step-checkbox-container">
+                        <input type="checkbox" class="step-checkbox" data-step="config1">
+                    </div>
+                    <span class="step-number">1</span>
+                    <strong>Controlar o Tempo no Sistema</strong>
+                    <p>Na janela de parâmetros, selecione o quadro <span class="highlight">"Controlar o tempo no sistema"</span> para habilitar as demais opções disponíveis.</p>
+                </div>
+
+                <div class="step">
+                    <div class="step-checkbox-container">
+                        <input type="checkbox" class="step-checkbox" data-step="config2">
+                    </div>
+                    <span class="step-number">2</span>
+                    <strong>Definir Tempo de Ociosidade</strong>
+                    <p>Na opção <span class="highlight">"Não contar como tempo gasto quando o sistema ficar Ocioso por X minutos"</span>, defina quantos minutos após o usuário ficar ocioso será considerado nos relatórios.</p>
+                    
+                    <div class="info-box">
+                        <strong>Exemplo prático:</strong><br>
+                        Se o usuário ficar 50 minutos ocioso no sistema e você definir 10 minutos nessa opção, será considerado somente os 10 minutos. Os outros 40 minutos não serão contabilizados como tempo gasto.
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div class="step-checkbox-container">
+                        <input type="checkbox" class="step-checkbox" data-step="config3">
+                    </div>
+                    <span class="step-number">3</span>
+                    <strong>Configurar Exibição de Tela de Ociosidade</strong>
+                    <p>Na opção <span class="highlight">"Não exibir a tela de ociosidade"</span>:</p>
+                    <ul>
+                        <li><strong>Marcado:</strong> Não será demonstrado que o usuário está ocioso</li>
+                        <li><strong>Desmarcado:</strong> Será apresentada a mensagem quando o usuário ficar ocioso</li>
+                    </ul>
+                </div>
+
+                <div class="step">
+                    <div class="step-checkbox-container">
+                        <input type="checkbox" class="step-checkbox" data-step="config4">
+                    </div>
+                    <span class="step-number">4</span>
+                    <strong>Desconexão Automática</strong>
+                    <p>Na opção <span class="highlight">"Desconectar automaticamente usuário após X minutos de ociosidade"</span>, defina quantos minutos após o usuário ficar ocioso ele será desconectado do sistema automaticamente.</p>
+                </div>
+
+                <div class="step">
+                    <div class="step-checkbox-container">
+                        <input type="checkbox" class="step-checkbox" data-step="config5">
+                    </div>
+                    <span class="step-number">5</span>
+                    <strong>Selecionar Usuários Afetados</strong>
+                    <p>Após definir a quantidade de tempo, clique no botão <span class="highlight">"Usuários"</span> e selecione os usuários que você deseja que essa regra afete.</p>
+                </div>
+
+                <div class="step">
+                    <div class="step-checkbox-container">
+                        <input type="checkbox" class="step-checkbox" data-step="config6">
+                    </div>
+                    <span class="step-number">6</span>
+                    <strong>Salvar Configurações</strong>
+                    <p>Clique no botão <span class="highlight">"OK"</span> para salvar as configurações.</p>
+                </div>
+
+                <div class="warning">
+                    <strong>⚠️ Atenção:</strong> Esta alteração só terá efeito após reiniciar todos os módulos do sistema. Certifique-se de reiniciar o sistema após salvar as configurações.
+                </div>
+            </div>
+        </div>
+
+        <!-- Seção 3: Classificações de Atividades -->
+        <div class="section">
+            <div class="section-header">
+                <h2>📂 Classificações de Atividades</h2>
+                <span class="section-icon">▼</span>
+            </div>
+            <div class="section-content">
+                <p>As classificações permitem categorizar atividades realizadas fora do sistema para melhor organização e análise.</p>
+
+                <div class="menu-path">
+                    Menu → Arquivos → Classificações
+                </div>
+
+                <div class="step">
+                    <div class="step-checkbox-container">
+                        <input type="checkbox" class="step-checkbox" data-step="class1">
+                    </div>
+                    <span class="step-number">1</span>
+                    <strong>Incluir Nova Classificação</strong>
+                    <p>Clique no botão <span class="highlight">"Novo"</span> para criar uma nova classificação de atividade.</p>
+                </div>
+
+                <div class="step">
+                    <div class="step-checkbox-container">
+                        <input type="checkbox" class="step-checkbox" data-step="class2">
+                    </div>
+                    <span class="step-number">2</span>
+                    <strong>Código Automático</strong>
+                    <p>O código será automaticamente preenchido conforme as classificações já cadastradas dentro do sistema.</p>
+                </div>
+
+                <div class="step">
+                    <div class="step-checkbox-container">
+                        <input type="checkbox" class="step-checkbox" data-step="class3">
+                    </div>
+                    <span class="step-number">3</span>
+                    <strong>Descrição da Classificação</strong>
+                    <p>No campo <span class="highlight">"Descrição"</span>, informe uma descrição clara e objetiva para essa classificação.</p>
+                </div>
+
+                <div class="step">
+                    <div class="step-checkbox-container">
+                        <input type="checkbox" class="step-checkbox" data-step="class4">
+                    </div>
+                    <span class="step-number">4</span>
+                    <strong>Salvar</strong>
+                    <p>Clique no botão <span class="highlight">"Gravar"</span> para salvar a nova classificação.</p>
+                </div>
+
+                <div class="info-box">
+                    <strong>Dica:</strong> Utilize classificações que façam sentido para o seu fluxo de trabalho, como "Reunião Externa", "Atendimento Presencial", "Treinamento", etc.
+                </div>
+            </div>
+        </div>
+
+        <!-- Seção 4: Registro de Atividades -->
+        <div class="section">
+            <div class="section-header">
+                <h2>📝 Registro de Atividades Externas</h2>
+                <span class="section-icon">▼</span>
+            </div>
+            <div class="section-content">
+                <p>O registro de atividades permite cadastrar todas as atividades que não foram realizadas dentro do sistema, mas que devem ser consideradas no tempo gasto nos relatórios do Módulo Administrar.</p>
+
+                <div class="menu-path">
+                    Menu → Arquivos → Registro de Atividades
+                </div>
+
+                <div class="step">
+                    <div class="step-checkbox-container">
+                        <input type="checkbox" class="step-checkbox" data-step="reg1">
+                    </div>
+                    <span class="step-number">1</span>
+                    <strong>Novo Cadastro</strong>
+                    <p>Clique no botão <span class="highlight">"Novo"</span> para iniciar o registro de uma nova atividade.</p>
+                </div>
+
+                <div class="step">
+                    <div class="step-checkbox-container">
+                        <input type="checkbox" class="step-checkbox" data-step="reg2">
+                    </div>
+                    <span class="step-number">2</span>
+                    <strong>Informar Cliente</strong>
+                    <p>No campo <span class="highlight">"Cliente"</span>, informe o código do cliente para qual realizou a atividade.</p>
+                </div>
+
+                <div class="step">
+                    <div class="step-checkbox-container">
+                        <input type="checkbox" class="step-checkbox" data-step="reg3">
+                    </div>
+                    <span class="step-number">3</span>
+                    <strong>Selecionar Classificação</strong>
+                    <p>No campo <span class="highlight">"Classificação"</span>, selecione o tipo de atividade realizada para esse cliente.</p>
+                </div>
+
+                <div class="step">
+                    <div class="step-checkbox-container">
+                        <input type="checkbox" class="step-checkbox" data-step="reg4">
+                    </div>
+                    <span class="step-number">4</span>
+                    <strong>Data e Horários</strong>
+                    <p>Preencha os seguintes campos:</p>
+                    <ul>
+                        <li><strong>Data:</strong> Data em que foi realizada a atividade</li>
+                        <li><strong>Hora Inicial:</strong> Horário em que foi iniciada a atividade</li>
+                        <li><strong>Hora Final:</strong> Horário em que foi encerrada a atividade</li>
+                    </ul>
+                </div>
+
+                <div class="step">
+                    <div class="step-checkbox-container">
+                        <input type="checkbox" class="step-checkbox" data-step="reg5">
+                    </div>
+                    <span class="step-number">5</span>
+                    <strong>Status da Atividade</strong>
+                    <p>No campo <span class="highlight">"Finalizar"</span>, selecione se a atividade foi finalizada ou não.</p>
+                </div>
+
+                <div class="step">
+                    <div class="step-checkbox-container">
+                        <input type="checkbox" class="step-checkbox" data-step="reg6">
+                    </div>
+                    <span class="step-number">6</span>
+                    <strong>Descrição</strong>
+                    <p>No campo <span class="highlight">"Descrição"</span>, informe uma descrição detalhada da atividade realizada.</p>
+                </div>
+
+                <div class="step">
+                    <div class="step-checkbox-container">
+                        <input type="checkbox" class="step-checkbox" data-step="reg7">
+                    </div>
+                    <span class="step-number">7</span>
+                    <strong>Salvar Registro</strong>
+                    <p>Clique no botão <span class="highlight">"Gravar"</span> para salvar o cadastro da atividade.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Seção 5: Relatório de Tarefas Realizadas -->
+        <div class="section">
+            <div class="section-header">
+                <h2>📊 Relatório de Tarefas Realizadas</h2>
+                <span class="section-icon">▼</span>
+            </div>
+            <div class="section-content">
+                <p>Este relatório permite avaliar uma relação de lançamentos contábeis e fiscais realizados por todos os usuários do sistema.</p>
+
+                <div class="menu-path">
+                    Menu → Relatórios → Tarefas Realizadas
+                </div>
+
+                <h3 style="color: #a8e6a1; margin-top: 20px; margin-bottom: 15px;">Configurações do Relatório:</h3>
+
+                <div class="step">
+                    <div class="step-checkbox-container">
+                        <input type="checkbox" class="step-checkbox" data-step="rel1">
+                    </div>
+                    <span class="step-number">1</span>
+                    <strong>Modelo do Relatório</strong>
+                    <p>No quadro <span class="highlight">"Modelo do Relatório"</span>, defina se o relatório será <strong>Completo</strong> ou <strong>Resumido</strong>.</p>
+                </div>
+
+                <div class="step">
+                    <div class="step-checkbox-container">
+                        <input type="checkbox" class="step-checkbox" data-step="rel2">
+                    </div>
+                    <span class="step-number">2</span>
+                    <strong>Período</strong>
+                    <p>No quadro <span class="highlight">"Data"</span>, informe o período inicial e final em que serão filtradas as informações.</p>
+                </div>
+
+                <div class="step">
+                    <div class="step-checkbox-container">
+                        <input type="checkbox" class="step-checkbox" data-step="rel3">
+                    </div>
+                    <span class="step-number">3</span>
+                    <strong>Quebra de Relatório</strong>
+                    <p>No quadro <span class="highlight">"Quebra por"</span>, selecione:</p>
+                    <ul>
+                        <li>Cliente + Usuário</li>
+                        <li>Usuário + Cliente</li>
+                    </ul>
+                </div>
+
+                <div class="step">
+                    <div class="step-checkbox-container">
+                        <input type="checkbox" class="step-checkbox" data-step="rel4">
+                    </div>
+                    <span class="step-number">4</span>
+                    <strong>Tipo de Relatório</strong>
+                    <p>No quadro <span class="highlight">"Tipo de Relatório"</span>, selecione:</p>
+                    <ul>
+                        <li>Somente lançamentos contábeis</li>
+                        <li>Somente notas fiscais</li>
+                        <li>Todos</li>
+                    </ul>
+                </div>
+
+                <div class="step">
+                    <div class="step-checkbox-container">
+                        <input type="checkbox" class="step-checkbox" data-step="rel5">
+                    </div>
+                    <span class="step-number">5</span>
+                    <strong>Ordenação</strong>
+                    <p>Defina se a ordem será pelo <strong>código</strong> ou <strong>nome</strong> do cliente.</p>
+                </div>
+
+                <div class="step">
+                    <div class="step-checkbox-container">
+                        <input type="checkbox" class="step-checkbox" data-step="rel6">
+                    </div>
+                    <span class="step-number">6</span>
+                    <strong>Origem dos Lançamentos</strong>
+                    <p>No quadro <span class="highlight">"Origem Lançamentos Contábeis"</span>, defina se deseja filtrar uma origem específica ou selecione a opção <strong>"Todos"</strong>.</p>
+                </div>
+
+                <div class="step">
+                    <div class="step-checkbox-container">
+                        <input type="checkbox" class="step-checkbox" data-step="rel7">
+                    </div>
+                    <span class="step-number">7</span>
+                    <strong>Considerar Data</strong>
+                    <p>No quadro <span class="highlight">"Considerar"</span>, selecione se será considerada:</p>
+                    <ul>
+                        <li>Data do lançamento</li>
+                        <li>Data do documento</li>
+                    </ul>
+                </div>
+
+                <div class="step">
+                    <div class="step-checkbox-container">
+                        <input type="checkbox" class="step-checkbox" data-step="rel8">
+                    </div>
+                    <span class="step-number">8</span>
+                    <strong>Selecionar Usuários</strong>
+                    <p>No quadro <span class="highlight">"Usuário"</span>, selecione de quais usuários você deseja avaliar as tarefas realizadas.</p>
+                </div>
+
+                <div class="step">
+                    <div class="step-checkbox-container">
+                        <input type="checkbox" class="step-checkbox" data-step="rel9">
+                    </div>
+                    <span class="step-number">9</span>
+                    <strong>Filtrar Clientes</strong>
+                    <p>Clique no botão <span class="highlight">"Cliente"</span> para selecionar um cliente específico ou selecione <strong>"Todos"</strong> para gerar de todos os clientes.</p>
+                </div>
+
+                <div class="step">
+                    <div class="step-checkbox-container">
+                        <input type="checkbox" class="step-checkbox" data-step="rel10">
+                    </div>
+                    <span class="step-number">10</span>
+                    <strong>Emitir Relatório</strong>
+                    <p>Após configurar todos os filtros, clique no botão <span class="highlight">"OK"</span> para emitir o relatório.</p>
+                </div>
+
+                <div class="info-box">
+                    <strong>Resultado:</strong> O relatório será gerado conforme os filtros realizados, apresentando todas as informações de forma organizada e detalhada.
+                </div>
+            </div>
+        </div>
+
+        <!-- Seção 6: Relatório de Registro de Atividades -->
+        <div class="section">
+            <div class="section-header">
+                <h2>📈 Relatório de Registro de Atividades</h2>
+                <span class="section-icon">▼</span>
+            </div>
+            <div class="section-content">
+                <p>Este relatório permite avaliar as atividades realizadas fora do sistema que foram registradas manualmente.</p>
+
+                <div class="menu-path">
+                    Menu → Relatórios → Registro de Atividades
+                </div>
+
+                <div class="step">
+                    <div class="step-checkbox-container">
+                        <input type="checkbox" class="step-checkbox" data-step="relat1">
+                    </div>
+                    <span class="step-number">1</span>
+                    <strong>Definir Período</strong>
+                    <p>Defina um período inicial e final para filtrar no relatório.</p>
+                </div>
+
+                <div class="step">
+                    <div class="step-checkbox-container">
+                        <input type="checkbox" class="step-checkbox" data-step="relat2">
+                    </div>
+                    <span class="step-number">2</span>
+                    <strong>Ordem do Relatório</strong>
+                    <p>No quadro <span class="highlight">"Ordem"</span>, defina a ordem em que serão demonstradas as informações no relatório.</p>
+                </div>
+
+                <div class="step">
+                    <div class="step-checkbox-container">
+                        <input type="checkbox" class="step-checkbox" data-step="relat3">
+                    </div>
+                    <span class="step-number">3</span>
+                    <strong>Quebra de Relatório</strong>
+                    <p>No quadro <span class="highlight">"Quebrar Relatórios"</span>, defina se terá alguma quebra no relatório.</p>
+                </div>
+
+                <div class="step">
+                    <div class="step-checkbox-container">
+                        <input type="checkbox" class="step-checkbox" data-step="relat4">
+                    </div>
+                    <span class="step-number">4</span>
+                    <strong>Filtros Específicos</strong>
+                    <p>Caso precise filtrar informações específicas, utilize os botões:</p>
+                    <ul>
+                        <li><span class="highlight">Clientes</span> - Para filtrar por cliente específico</li>
+                        <li><span class="highlight">Usuários</span> - Para filtrar por usuário específico</li>
+                        <li><span class="highlight">Classificações</span> - Para filtrar por tipo de atividade</li>
+                    </ul>
+                </div>
+
+                <div class="step">
+                    <div class="step-checkbox-container">
+                        <input type="checkbox" class="step-checkbox" data-step="relat5">
+                    </div>
+                    <span class="step-number">5</span>
+                    <strong>Gerar Relatório</strong>
+                    <p>Após configurar os filtros desejados, clique em <span class="highlight">"OK"</span> para gerar o relatório.</p>
+                </div>
+
+                <div class="info-box">
+                    <strong>Dica:</strong> Utilize a opção "Todos" quando desejar uma visão geral de todas as atividades registradas no período selecionado.
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // Script para controlar a abertura e fechamento das seções
+        document.addEventListener('DOMContentLoaded', function() {
+            const sections = document.querySelectorAll('.section');
+            
+            sections.forEach(section => {
+                const header = section.querySelector('.section-header');
+                
+                header.addEventListener('click', function() {
+                    // Fecha todas as outras seções
+                    sections.forEach(otherSection => {
+                        if (otherSection !== section) {
+                            otherSection.classList.remove('active');
+                        }
+                    });
+                    
+                    // Alterna a seção clicada
+                    section.classList.toggle('active');
+                });
+            });
+
+            // Sistema de Checklist e Gráfico Donut
+            const stepCheckboxes = document.querySelectorAll('.step-checkbox');
+            const checklistCheckboxes = document.querySelectorAll('.checklist-checkbox');
+            const allCheckboxes = [...stepCheckboxes, ...checklistCheckboxes];
+            
+            const progressCircle = document.getElementById('progressCircle');
+            const percentageText = document.getElementById('percentageText');
+            const totalItemsText = document.getElementById('totalItems');
+            const completedItemsText = document.getElementById('completedItems');
+            const remainingItemsText = document.getElementById('remainingItems');
+
+            const circumference = 2 * Math.PI * 80; // 2πr onde r=80
+            progressCircle.style.strokeDasharray = circumference;
+            progressCircle.style.strokeDashoffset = circumference;
+
+            // Carregar estado salvo do localStorage
+            function loadCheckboxState() {
+                allCheckboxes.forEach((checkbox, index) => {
+                    const savedState = localStorage.getItem(`checkbox_${index}`);
+                    if (savedState === 'true') {
+                        checkbox.checked = true;
+                        updateCheckboxUI(checkbox);
+                    }
+                });
+                updateProgress();
+            }
+
+            // Salvar estado no localStorage
+            function saveCheckboxState(checkbox, index) {
+                localStorage.setItem(`checkbox_${index}`, checkbox.checked);
+            }
+
+            // Atualizar UI do checkbox
+            function updateCheckboxUI(checkbox) {
+                if (checkbox.classList.contains('step-checkbox')) {
+                    const step = checkbox.closest('.step');
+                    if (checkbox.checked) {
+                        step.classList.add('completed');
+                    } else {
+                        step.classList.remove('completed');
+                    }
+                } else if (checkbox.classList.contains('checklist-checkbox')) {
+                    const item = checkbox.closest('.checklist-item');
+                    if (checkbox.checked) {
+                        item.classList.add('completed');
+                    } else {
+                        item.classList.remove('completed');
+                    }
+                }
+            }
+
+            // Atualizar progresso
+            function updateProgress() {
+                const total = allCheckboxes.length;
+                const completed = Array.from(allCheckboxes).filter(cb => cb.checked).length;
+                const remaining = total - completed;
+                const percentage = total > 0 ? Math.round((completed / total) * 100) : 0;
+
+                // Atualizar textos
+                totalItemsText.textContent = total;
+                completedItemsText.textContent = completed;
+                remainingItemsText.textContent = remaining;
+                percentageText.textContent = percentage + '%';
+
+                // Atualizar círculo
+                const offset = circumference - (percentage / 100) * circumference;
+                progressCircle.style.strokeDashoffset = offset;
+            }
+
+            // Event listeners para todos os checkboxes
+            allCheckboxes.forEach((checkbox, index) => {
+                checkbox.addEventListener('change', function() {
+                    updateCheckboxUI(this);
+                    saveCheckboxState(this, index);
+                    updateProgress();
+                });
+            });
+
+            // Inicializar
+            loadCheckboxState();
+        });
+    </script>
+</body>
+</html>
+
